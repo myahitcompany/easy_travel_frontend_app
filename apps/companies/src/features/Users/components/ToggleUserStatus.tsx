@@ -86,7 +86,7 @@ export function ToggleUserStatus({ open, handleClose, user, onStatusToggled }: T
 
         <Typography className="!text-gray-600 !mb-6">
           Êtes-vous sûr de vouloir {action} l'utilisateur{" "}
-          <strong>{user.first_name} {user.last_name}</strong> ({user.email}) ?
+          <strong>{user.first_name} {user.last_name}</strong> ?
         </Typography>
 
         {isActive && (
@@ -95,7 +95,7 @@ export function ToggleUserStatus({ open, handleClose, user, onStatusToggled }: T
           </Typography>
         )}
 
-        <div className="flex justify-end space-x-2">
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button
             onClick={handleModalClose}
             variant="outlined"
@@ -111,7 +111,7 @@ export function ToggleUserStatus({ open, handleClose, user, onStatusToggled }: T
           >
             {loading ? `${actionCapitalized}...` : actionCapitalized}
           </Button>
-        </div>
+        </Box>
       </Box>
     </Modal>
   );

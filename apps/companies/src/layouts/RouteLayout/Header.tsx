@@ -18,7 +18,7 @@ export function Header() {
   // ];
 
   return (
-    <div className="flex flex-row h-28 items-center justify-between border-b-[1px] border-neutral-20 p-10 sticky top-0 z-50 bg-white">
+    <div className="flex flex-row  items-center justify-between border-b-[1px] border-neutral-20 p-6 sticky top-0 z-50 bg-white">
       <div className="context text-3xl text-secondary-bleu-100 leading-lg">
         {appMetaData.title}
       </div>

@@ -45,6 +45,7 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (user) {
@@ -62,6 +63,10 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [field]: event.target.value });
+    // Effacer l'erreur du champ quand l'utilisateur commence à taper
+    if (fieldErrors[field]) {
+      setFieldErrors({ ...fieldErrors, [field]: "" });
+    }
   };
 
   const handleSelectChange = (event: any) => {
@@ -86,6 +91,7 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
 
     if (!validateForm() || !user) return;
 
@@ -95,7 +101,13 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
       handleClose();
       onUserUpdated?.();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Erreur lors de la mise à jour de l'utilisateur");
+      if (err.response?.data?.message && typeof err.response.data.message === 'object') {
+        // Erreurs spécifiques par champ
+        setFieldErrors(err.response.data.message);
+      } else {
+        // Erreur générale
+        setError(err.response?.data?.message || "Erreur lors de la mise à jour de l'utilisateur");
+      }
     } finally {
       setLoading(false);
     }
@@ -104,6 +116,7 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
   const handleModalClose = () => {
     handleClose();
     setError(null);
+    setFieldErrors({});
   };
 
   if (!user) return null;
@@ -131,7 +144,7 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="Nom d'utilisateur"
@@ -139,9 +152,12 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
             onChange={handleInputChange("username")}
             required
             size="small"
+            sx={{ mb: 2, mt:4 }}
+            error={!!fieldErrors.username}
+            helperText={fieldErrors.username}
           />
 
-          <div className="flex gap-2">
+          <div className="flex gap-2" style={{ marginBottom: '16px' }}>
             <TextField
               fullWidth
               label="Prénom"
@@ -149,6 +165,9 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
               onChange={handleInputChange("first_name")}
               required
               size="small"
+              error={!!fieldErrors.first_name}
+              helperText={fieldErrors.first_name}
+              sx={{ mb:2}}
             />
             <TextField
               fullWidth
@@ -157,6 +176,8 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
               onChange={handleInputChange("last_name")}
               required
               size="small"
+              error={!!fieldErrors.last_name}
+              helperText={fieldErrors.last_name}
             />
           </div>
 
@@ -168,9 +189,12 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
             onChange={handleInputChange("email")}
             required
             size="small"
+            sx={{ mb: 2 }}
+            error={!!fieldErrors.email}
+            helperText={fieldErrors.email}
           />
 
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth size="small" sx={{ mb: 3 }}>
             <InputLabel>Groupe</InputLabel>
             <Select
               value={formData.group}
@@ -185,7 +209,7 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
             </Select>
           </FormControl>
 
-          <div className="flex justify-end space-x-2 !mt-6">
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button
               onClick={handleModalClose}
               variant="outlined"
@@ -201,7 +225,7 @@ export function UpdateUser({ open, handleClose, user, onUserUpdated }: UpdateUse
             >
               {loading ? "Modification..." : "Modifier l'utilisateur"}
             </Button>
-          </div>
+          </Box>
         </form>
       </Box>
     </Modal>

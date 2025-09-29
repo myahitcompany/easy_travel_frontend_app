@@ -43,7 +43,7 @@ export interface CreateUserPayload {
   confirm_password: string;
   group: 'administrator' | 'manager' | 'booking_manager';
   phone?: string;
-  company_id: number;
+  company_id?: number;
 }
 
 export interface UpdateUserPayload {

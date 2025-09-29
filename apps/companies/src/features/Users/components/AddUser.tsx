@@ -41,18 +41,23 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
     email: "",
     password: "",
     confirm_password: "",
-    group: "administrator",
+    group: "manager",
     phone: "",
-    company_id: 1, // Vous pouvez ajuster selon votre logique
+    company_id: undefined, // Vous pouvez ajuster selon votre logique
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: keyof CreateUserPayload) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData({ ...formData, [field]: event.target.value });
+    // Effacer l'erreur du champ quand l'utilisateur commence à taper
+    if (fieldErrors[field]) {
+      setFieldErrors({ ...fieldErrors, [field]: "" });
+    }
   };
 
   const handleSelectChange = (event: any) => {
@@ -87,6 +92,7 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
 
     if (!validateForm()) return;
 
@@ -97,7 +103,13 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
       onUserCreated?.();
       resetForm();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Erreur lors de la création de l'utilisateur");
+      if (err.response?.data?.message && typeof err.response.data.message === 'object') {
+        // Erreurs spécifiques par champ
+        setFieldErrors(err.response.data.message);
+      } else {
+        // Erreur générale
+        setError(err.response?.data?.message || "Erreur lors de la création de l'utilisateur");
+      }
     } finally {
       setLoading(false);
     }
@@ -111,11 +123,12 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
       email: "",
       password: "",
       confirm_password: "",
-      group: "administrator",
+      group: "manager",
       phone: "",
-      company_id: 1,
+      company_id: undefined,
     });
     setError(null);
+    setFieldErrors({});
   };
 
   const handleModalClose = () => {
@@ -146,7 +159,7 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="Nom d'utilisateur"
@@ -154,9 +167,12 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
             onChange={handleInputChange("username")}
             required
             size="small"
+            sx={{ mb: 2, mt:4 }}
+            error={!!fieldErrors.username}
+            helperText={fieldErrors.username}
           />
 
-          <div className="flex gap-2">
+          <div className="flex gap-2" style={{ marginBottom: '16px' }}>
             <TextField
               fullWidth
               label="Prénom"
@@ -164,6 +180,8 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
               onChange={handleInputChange("first_name")}
               required
               size="small"
+              error={!!fieldErrors.first_name}
+              helperText={fieldErrors.first_name}
             />
             <TextField
               fullWidth
@@ -172,6 +190,9 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
               onChange={handleInputChange("last_name")}
               required
               size="small"
+              sx={{ mt:2 }}
+              error={!!fieldErrors.last_name}
+              helperText={fieldErrors.last_name}
             />
           </div>
 
@@ -183,6 +204,9 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
             onChange={handleInputChange("email")}
             required
             size="small"
+            sx={{ mb: 2 }}
+            error={!!fieldErrors.email}
+            helperText={fieldErrors.email}
           />
 
           <TextField
@@ -191,9 +215,12 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
             value={formData.phone}
             onChange={handleInputChange("phone")}
             size="small"
+            sx={{ mb: 2 }}
+            error={!!fieldErrors.phone}
+            helperText={fieldErrors.phone}
           />
 
-          <FormControl fullWidth size="small">
+          <FormControl fullWidth size="small" sx={{ mb: 2 }}>
             <InputLabel>Groupe</InputLabel>
             <Select
               value={formData.group}
@@ -216,6 +243,9 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
             onChange={handleInputChange("password")}
             required
             size="small"
+            sx={{ mb: 2 }}
+            error={!!fieldErrors.password}
+            helperText={fieldErrors.password}
           />
 
           <TextField
@@ -226,9 +256,12 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
             onChange={handleInputChange("confirm_password")}
             required
             size="small"
+            sx={{ mb: 3 }}
+            error={!!fieldErrors.confirm_password}
+            helperText={fieldErrors.confirm_password}
           />
 
-          <div className="flex justify-end space-x-2 !mt-6">
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button
               onClick={handleModalClose}
               variant="outlined"
@@ -244,7 +277,7 @@ export function AddUser({ open, handleClose, onUserCreated }: AddUserProps) {
             >
               {loading ? "Création..." : "Créer l'utilisateur"}
             </Button>
-          </div>
+          </Box>
         </form>
       </Box>
     </Modal>

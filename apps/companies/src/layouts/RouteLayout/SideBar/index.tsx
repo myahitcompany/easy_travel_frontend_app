@@ -24,7 +24,7 @@ export default function SideBar() {
 
   return (
     <div className="h-screen flex flex-col w-2xs border-r-[1px] border-[#3D3D3D33] p-5">
-      <div className="pb-9">
+      <div className="pb-4">
         <img src="/assets/images/logo-esay-travel.svg" />
       </div>
       <div className="flex flex-col justify-between h-full">

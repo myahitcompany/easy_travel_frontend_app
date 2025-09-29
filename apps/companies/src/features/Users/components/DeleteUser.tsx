@@ -90,7 +90,7 @@ export function DeleteUser({ open, handleClose, user, onUserDeleted }: DeleteUse
           associées à cet utilisateur.
         </Typography>
 
-        <div className="flex justify-end space-x-2">
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button
             onClick={handleModalClose}
             variant="outlined"
@@ -106,7 +106,7 @@ export function DeleteUser({ open, handleClose, user, onUserDeleted }: DeleteUse
           >
             {loading ? "Suppression..." : "Supprimer"}
           </Button>
-        </div>
+        </Box>
       </Box>
     </Modal>
   );
