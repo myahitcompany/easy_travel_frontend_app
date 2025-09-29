@@ -30,11 +30,11 @@ export default function SideBar() {
       <div className="flex flex-col justify-between h-full">
         <div className="pt-4 flex flex-col relative transition-all duration-300">
           <div className="space-y-2">
-            {/* <SidebarLink
-              to={APP_ROUTES.DASHBOARD.NAME}
-              icon={<Element4 className="w-5 h-5" />}
-              labelKey="Dashboard"
-            /> */}
+             <SidebarLink
+              to={APP_ROUTES.USERS.PATH}
+              icon={<Profile2User className="w-5 h-5" />}
+              labelKey="Gestion des utilisateurs"
+            />
 
            
             <SidebarLink

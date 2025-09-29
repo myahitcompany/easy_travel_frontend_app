@@ -22,15 +22,23 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: async (data: LoginPayload) => {
+      // Convertir les données de login en FormData
+      const formData = new FormData();
+      Object.keys(data).forEach(key => {
+        if (data[key as keyof LoginPayload] !== undefined && data[key as keyof LoginPayload] !== null) {
+          formData.append(key, data[key as keyof LoginPayload] as string);
+        }
+      });
+
       const response = await apiClient.post(
         `${API_ENDPOINTS.AUTH.LOGIN}`,
-        data
+        formData
       );
-      const token = response.data.access_token;
+      const token = response.data.data.access_token;
 
       PersistentStorage.setData(
         StorageKeys.ESAY_TOKEN_KEY,
-        response.data.access_token
+        response.data.data.access_token
       );
 
       setAuthToken(token);

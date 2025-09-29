@@ -6,7 +6,7 @@ import { PersistentStorage, StorageKeys } from "@/utils";
 const apiClient = axios.create({
   baseURL: appConfig.ESAY_TRAVEL_API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "multipart/form-data",
   },
 });
 
@@ -21,11 +21,12 @@ export const setAuthToken = (token: string) => {
 
 // Initialisation de l'API client en récupérant le token stocké
 export const initializeApiClient = () => {
-  const token = PersistentStorage.getData(
-    StorageKeys.ESAY_TOKEN_KEY,
-    false
-  )?.replace(/^"(.*)"$/, "$1");
-  setAuthToken(token);
+  const token = PersistentStorage.getData(StorageKeys.ESAY_TOKEN_KEY, false);
+  if (token) {
+    // Enlever les guillemets si présents (causés par JSON.stringify)
+    const cleanToken = token.replace(/^"(.*)"$/, "$1");
+    setAuthToken(cleanToken);
+  }
 };
 
 // Vérification de l'expiration du token dans l'intercepteur de réponse

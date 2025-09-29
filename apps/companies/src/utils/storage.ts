@@ -16,11 +16,6 @@ export const PersistentStorage = {
   setData(key: string, value: unknown, stringify: boolean = true) {
     const itemKey = `${key}`;
 
-    // Vérifie si la clé est 'token' et ajoute 'JWT ' devant la valeur
-    if (itemKey) {
-      value = `${value}`;
-    }
-
     // Si stringify est vrai, on transforme la valeur en JSON, sinon on l'enregistre tel quel
     const dataToStore = stringify ? JSON.stringify(value) : (value as string);
     this.engine.setItem(itemKey, dataToStore);
@@ -51,11 +46,6 @@ export const EphemeralStorage = {
 
   setData(key: string, value: unknown, stringify: boolean = true) {
     const itemKey = `${key}`;
-
-    // Vérifie si la clé est 'token' et ajoute 'JWT ' devant la valeur
-    if (itemKey) {
-      value = `${value}`;
-    }
 
     const dataToStore = stringify ? JSON.stringify(value) : (value as string);
     this.engine.setItem(itemKey, dataToStore);
