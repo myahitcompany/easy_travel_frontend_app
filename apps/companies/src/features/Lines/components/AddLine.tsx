@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Route, Clock, Calendar, DollarSign, X } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { linesApi } from '../services';
 import { CreateLinePayload, LineSchedule } from '../types';
-import { Alert, CircularProgress } from '@mui/material';
+import { Alert, CircularProgress, Autocomplete, TextField } from '@mui/material';
+import { locationsApi } from '@/services/locations';
 
 interface DaySchedule {
   day: string;
@@ -27,13 +28,16 @@ export default function AddLinePage() {
     description: '',
   });
 
+  const [communes, setCommunes] = useState<{ id: string; label: string }[]>([]);
+  const [arrondissements, setArrondissements] = useState<{ id: string; label: string }[]>([]);
   const [intermediateStops, setIntermediateStops] = useState<string[]>([]);
-  const [currentStop, setCurrentStop] = useState('');
+  const [selectedStop, setSelectedStop] = useState<{ id: string; label: string } | null>(null);
   const [isActive, setIsActive] = useState(true);
   const [schedules, setSchedules] = useState<DaySchedule[]>([]);
   const [selectedDay, setSelectedDay] = useState('1');
   const [selectedTime, setSelectedTime] = useState('06:00');
   const [loading, setLoading] = useState(false);
+  const [loadingLocations, setLoadingLocations] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -49,15 +53,46 @@ export default function AddLinePage() {
 
   const times = ['06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
 
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        setLoadingLocations(true);
+        const [communesRes, arrondissementsRes] = await Promise.all([
+          locationsApi.getCommunes(),
+          locationsApi.getArrondissements(),
+        ]);
+
+        // Convertir les objets en tableaux pour Autocomplete
+        const communesArray = Object.entries(communesRes.data).map(([id, label]) => ({
+          id,
+          label,
+        }));
+        const arrondissementsArray = Object.entries(arrondissementsRes.data).map(([id, label]) => ({
+          id,
+          label,
+        }));
+
+        setCommunes(communesArray);
+        setArrondissements(arrondissementsArray);
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Erreur lors du chargement des villes');
+      } finally {
+        setLoadingLocations(false);
+      }
+    };
+
+    fetchLocations();
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const addIntermediateStop = () => {
-    if (currentStop.trim() && !intermediateStops.includes(currentStop.trim())) {
-      setIntermediateStops([...intermediateStops, currentStop.trim()]);
-      setCurrentStop('');
+    if (selectedStop && !intermediateStops.includes(selectedStop.label)) {
+      setIntermediateStops([...intermediateStops, selectedStop.label]);
+      setSelectedStop(null);
     }
   };
 
@@ -195,42 +230,82 @@ export default function AddLinePage() {
             <div className="mb-[5px] text-[14px] text-[#0A195299] leading-[20.8px]">
               Ville de départ *
             </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="origin_city"
-                value={formData.origin_city}
-                onChange={handleInputChange}
-                placeholder="Saisir la ville de départ"
-                className="bg-white w-full h-[40px] rounded-[10px] border text-[14px] pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <Route
-                size={16}
-                color={formData.origin_city ? "#0A1952" : "#0A195299"}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
-              />
-            </div>
+            <Autocomplete
+              options={communes}
+              loading={loadingLocations}
+              getOptionLabel={(option) => option.label}
+              getOptionKey={(option) => option.id}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              value={communes.find(c => c.label === formData.origin_city) || null}
+              onChange={(_, newValue) => {
+                setFormData(prev => ({ ...prev, origin_city: newValue?.label || '' }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Sélectionner la ville de départ"
+                  size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '10px',
+                      fontSize: '14px',
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <Route size={16} color="#0A195299" className="ml-2 mr-1" />
+                          {params.InputProps.startAdornment}
+                        </>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
           </div>
 
           <div className="flex-1">
             <div className="mb-[5px] text-[14px] text-[#0A195299] leading-[20.8px]">
               Ville de destination *
             </div>
-            <div className="relative">
-              <input
-                type="text"
-                name="destination_city"
-                value={formData.destination_city}
-                onChange={handleInputChange}
-                placeholder="Saisir la ville de destination"
-                className="bg-white w-full h-[40px] rounded-[10px] border text-[14px] pl-10 pr-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <Route
-                size={16}
-                color={formData.destination_city ? "#0A1952" : "#0A195299"}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
-              />
-            </div>
+            <Autocomplete
+              options={communes}
+              loading={loadingLocations}
+              getOptionLabel={(option) => option.label}
+              getOptionKey={(option) => option.id}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              value={communes.find(c => c.label === formData.destination_city) || null}
+              onChange={(_, newValue) => {
+                setFormData(prev => ({ ...prev, destination_city: newValue?.label || '' }));
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Sélectionner la ville de destination"
+                  size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '10px',
+                      fontSize: '14px',
+                    },
+                  }}
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      startAdornment: (
+                        <>
+                          <Route size={16} color="#0A195299" className="ml-2 mr-1" />
+                          {params.InputProps.startAdornment}
+                        </>
+                      ),
+                    },
+                  }}
+                />
+              )}
+            />
           </div>
         </div>
 
@@ -240,17 +315,33 @@ export default function AddLinePage() {
             Points d'arrêt intermédiaires
           </div>
           <div className="flex gap-2 mb-2">
-            <input
-              type="text"
-              value={currentStop}
-              onChange={(e) => setCurrentStop(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && addIntermediateStop()}
-              placeholder="Ajouter un point d'arrêt"
-              className="flex-1 h-[40px] rounded-[10px] border text-[14px] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <Autocomplete
+              options={arrondissements}
+              loading={loadingLocations}
+              getOptionLabel={(option) => option.label}
+              getOptionKey={(option) => option.id}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              value={selectedStop}
+              onChange={(_, newValue) => setSelectedStop(newValue)}
+              className="flex-1"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  placeholder="Sélectionner un point d'arrêt"
+                  size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '10px',
+                      fontSize: '14px',
+                    },
+                  }}
+                />
+              )}
             />
             <button
               onClick={addIntermediateStop}
-              className="w-[40px] h-[40px] rounded-[10px] border border-[#0A195230] text-[#0A1952] text-[18px] font-bold hover:bg-[#0A195210] focus:outline-none"
+              disabled={!selectedStop}
+              className="w-[40px] h-[40px] rounded-[10px] border border-[#0A195230] text-[#0A1952] text-[18px] font-bold hover:bg-[#0A195210] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
             >
               +
             </button>
