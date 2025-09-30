@@ -11,6 +11,7 @@ import {
 interface ModalProps {
   openDeleteModal: boolean;
   handleCloseDeleteModal: () => void;
+  onConfirm: () => void;
 }
 
 const style = {
@@ -28,6 +29,7 @@ const style = {
 export function DeleteLine({
   openDeleteModal,
   handleCloseDeleteModal,
+  onConfirm,
 }: ModalProps) {
   return (
     <div>
@@ -95,6 +97,7 @@ export function DeleteLine({
                 Non
               </Button>
               <Button
+                onClick={onConfirm}
                 fullWidth
                 sx={{ textTransform: "none", borderRadius: "10px" }}
                 color="error"

@@ -13,6 +13,7 @@ import {
   CompanieDetailsUpdate,
   Users,
 } from "@/features";
+import { PopularLinesPage } from "@/features/Lines";
 import AddLinePage from "@/features/Lines/components/AddLine";
 import UpdateLinePage from "@/features/Lines/components/UpdateLine";
 import { AuthLayout, PrivateOutlet, RouteLayout } from "@/layouts";
@@ -34,7 +35,12 @@ export function AppRoutes() {
           <Route path={APP_ROUTES.BOOKINGS.PATH} element={<BookingsPage />} />
           <Route path={APP_ROUTES.USERS.PATH} element={<Users />} />
           <Route path={APP_ROUTES.BOXES.PATH} element={<BoxePage />} />
-          <Route path={APP_ROUTES.LINES.PATH} element={<LinesPage/>}/>
+          <Route path={APP_ROUTES.LINES.NAME}>
+            <Route index element={<LinesPage />} />
+            <Route path="popular" element={<PopularLinesPage />} />
+            <Route path="addline" element={<AddLinePage />} />
+            <Route path="updateline/:id" element={<UpdateLinePage />} />
+          </Route>
         
           
           <Route path={APP_ROUTES.DRIVERS.PATH} element={<DriversPage />} />

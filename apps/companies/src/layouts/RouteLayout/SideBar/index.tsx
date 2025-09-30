@@ -40,7 +40,7 @@ export default function SideBar() {
             <SidebarLink
               to={APP_ROUTES.LINES.PATH}
               icon={<TextalignJustifycenter className="w-5 h-5" />}
-              labelKey="Gestion des Lines"
+              labelKey="Gestion des Lignes"
             /> 
 
            
