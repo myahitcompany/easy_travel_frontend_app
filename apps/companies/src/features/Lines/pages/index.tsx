@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSetPageMeta } from "@/hooks";
-import { Edit, Trash, AddSquare } from "iconsax-react";
+import { Edit, Trash, AddSquare, ToggleOnCircle, ToggleOffCircle } from "iconsax-react";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -20,7 +20,7 @@ import {
   Tab,
   Box,
 } from "@mui/material";
-import { DeleteLine } from "../components";
+import { DeleteLine, ToggleLineStatus } from "../components";
 import { linesApi } from "../services";
 import { Line } from "../types";
 import { List, TrendingUp } from "lucide-react";
@@ -39,17 +39,28 @@ export function LinesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
+  const [openToggleModal, setOpenToggleModal] = useState(false);
+  const [selectedLine, setSelectedLine] = useState<Line | null>(null);
   const [tabValue, setTabValue] = useState(1);
 
-  const handleOpenDeleteModal = (lineId: string) => {
-    setSelectedLineId(lineId);
+  const handleOpenDeleteModal = (line: Line) => {
+    setSelectedLine(line);
     setOpenDeleteModal(true);
   };
 
   const handleCloseDeleteModal = () => {
-    setSelectedLineId(null);
+    setSelectedLine(null);
     setOpenDeleteModal(false);
+  };
+
+  const handleOpenToggleModal = (line: Line) => {
+    setSelectedLine(line);
+    setOpenToggleModal(true);
+  };
+
+  const handleCloseToggleModal = () => {
+    setSelectedLine(null);
+    setOpenToggleModal(false);
   };
 
   const fetchLines = async () => {
@@ -78,20 +89,11 @@ export function LinesPage() {
     navigate(`updateline/${lineId}`);
   };
 
-  const handleToggleStatus = async (lineId: string) => {
-    try {
-      await linesApi.toggleLineStatus(lineId);
-      fetchLines(); // Recharger la liste
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Erreur lors du changement de statut");
-    }
-  };
-
   const handleDeleteLine = async () => {
-    if (!selectedLineId) return;
+    if (!selectedLine) return;
 
     try {
-      await linesApi.deleteLine(selectedLineId);
+      await linesApi.deleteLine(selectedLine.id);
       handleCloseDeleteModal();
       fetchLines(); // Recharger la liste
     } catch (err: any) {
@@ -271,23 +273,22 @@ export function LinesPage() {
                     </div>
                   </TableCell>
                   <TableCell align="center" className="p-4">
-                    <div className="flex justify-center">
-                      <Chip
-                        label={line.is_active === "1" ? "Actif" : "Non actif"}
-                        size="medium"
-                        onClick={() => handleToggleStatus(line.id)}
-                        sx={{
-                          borderRadius: "8px",
-                          fontSize: "0.875rem",
-                          height: "32px",
-                          backgroundColor: line.is_active === "1" ? "#d4edda" : "#f8d7da",
-                          color: line.is_active === "1" ? "#155724" : "#721c24",
-                          cursor: "pointer",
-                          "&:hover": {
-                            opacity: 0.8,
-                          },
-                        }}
-                      />
+                    <div className="flex justify-center cursor-pointer">
+                      {line.is_active === "1" ? (
+                        <ToggleOnCircle
+                          size={28}
+                          color="#155724"
+                          variant="Bold"
+                          onClick={() => handleOpenToggleModal(line)}
+                        />
+                      ) : (
+                        <ToggleOffCircle
+                          size={28}
+                          color="#721c24"
+                          variant="Bold"
+                          onClick={() => handleOpenToggleModal(line)}
+                        />
+                      )}
                     </div>
                   </TableCell>
                   <TableCell align="right" className="p-4">
@@ -298,7 +299,7 @@ export function LinesPage() {
                         color="#0A1952"
                       />
                       <Trash
-                        onClick={() => handleOpenDeleteModal(line.id)}
+                        onClick={() => handleOpenDeleteModal(line)}
                         size={24}
                         color="#0A1952"
                       />
@@ -325,6 +326,12 @@ export function LinesPage() {
           openDeleteModal={openDeleteModal}
           handleCloseDeleteModal={handleCloseDeleteModal}
           onConfirm={handleDeleteLine}
+        />
+        <ToggleLineStatus
+          open={openToggleModal}
+          handleClose={handleCloseToggleModal}
+          line={selectedLine}
+          onStatusToggled={fetchLines}
         />
       </div>
     </div>
