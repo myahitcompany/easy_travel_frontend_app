@@ -34,11 +34,8 @@ export function AppRoutes() {
           <Route path={APP_ROUTES.BOOKINGS.PATH} element={<BookingsPage />} />
           <Route path={APP_ROUTES.USERS.PATH} element={<Users />} />
           <Route path={APP_ROUTES.BOXES.PATH} element={<BoxePage />} />
-          <Route path={APP_ROUTES.LINES.PATH}>
-          <Route index element = {<LinesPage/>}/>
-          <Route path="addline" element={<AddLinePage/>}/>
-          <Route path="updateline" element={<UpdateLinePage/>}/>
-          </Route>
+          <Route path={APP_ROUTES.LINES.PATH} element={<LinesPage/>}/>
+        
           
           <Route path={APP_ROUTES.DRIVERS.PATH} element={<DriversPage />} />
           <Route path={APP_ROUTES.STAFFS.PATH} element={<StaffsPage />} />

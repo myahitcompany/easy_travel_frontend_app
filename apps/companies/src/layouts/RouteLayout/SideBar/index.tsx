@@ -7,7 +7,8 @@ import {
   Logout,
   Warning2,
   Building, // <-- added icon import for agences
-  Driving
+  Driving,
+  TextalignJustifycenter
 } from "iconsax-react";
 import { Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -35,6 +36,12 @@ export default function SideBar() {
               icon={<Profile2User className="w-5 h-5" />}
               labelKey="Gestion des utilisateurs"
             />
+
+            <SidebarLink
+              to={APP_ROUTES.LINES.PATH}
+              icon={<TextalignJustifycenter className="w-5 h-5" />}
+              labelKey="Gestion des Lines"
+            /> 
 
            
             <SidebarLink
