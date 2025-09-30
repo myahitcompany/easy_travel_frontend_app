@@ -5,6 +5,7 @@ import { linesApi } from '../services';
 import { CreateLinePayload, LineSchedule } from '../types';
 import { Alert, CircularProgress, Autocomplete, TextField } from '@mui/material';
 import { locationsApi } from '@/services/locations';
+import { toast } from 'react-toastify';
 
 interface DaySchedule {
   day: string;
@@ -39,7 +40,6 @@ export default function AddLinePage() {
   const [loading, setLoading] = useState(false);
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const days = [
     { value: '1', label: 'Lundi' },
@@ -166,13 +166,21 @@ export default function AddLinePage() {
       };
 
       await linesApi.createLine(payload);
-      setSuccess(true);
+      toast.success('Ligne créée avec succès !', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
 
       setTimeout(() => {
         navigate('/lines');
-      }, 1500);
+      }, 1000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors de la création de la ligne');
+      const errorMessage = err.response?.data?.message || 'Erreur lors de la création de la ligne';
+      setError(errorMessage);
+      toast.error(errorMessage, {
+        position: 'top-right',
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -197,14 +205,6 @@ export default function AddLinePage() {
           <div className="px-[41px] mb-4">
             <Alert severity="error" onClose={() => setError(null)}>
               {error}
-            </Alert>
-          </div>
-        )}
-
-        {success && (
-          <div className="px-[41px] mb-4">
-            <Alert severity="success">
-              Ligne créée avec succès!
             </Alert>
           </div>
         )}

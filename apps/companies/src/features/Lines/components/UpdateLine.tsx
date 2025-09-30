@@ -5,6 +5,7 @@ import { linesApi } from '../services';
 import { UpdateLinePayload, LineSchedule, Line } from '../types';
 import { Alert, CircularProgress, Autocomplete, TextField } from '@mui/material';
 import { locationsApi } from '@/services/locations';
+import { toast } from 'react-toastify';
 
 interface DaySchedule {
   day: string;
@@ -41,7 +42,6 @@ export default function UpdateLinePage() {
   const [loadingData, setLoadingData] = useState(true);
   const [loadingLocations, setLoadingLocations] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const days = [
     { value: '1', label: 'Lundi' },
@@ -217,13 +217,21 @@ export default function UpdateLinePage() {
       };
 
       await linesApi.updateLine(id, payload);
-      setSuccess(true);
+      toast.success('Ligne mise à jour avec succès !', {
+        position: 'top-right',
+        autoClose: 3000,
+      });
 
       setTimeout(() => {
         navigate('/lines');
-      }, 1500);
+      }, 1000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors de la mise à jour de la ligne');
+      const errorMessage = err.response?.data?.message || 'Erreur lors de la mise à jour de la ligne';
+      setError(errorMessage);
+      toast.error(errorMessage, {
+        position: 'top-right',
+        autoClose: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -256,14 +264,6 @@ export default function UpdateLinePage() {
           <div className="px-[41px] mb-4">
             <Alert severity="error" onClose={() => setError(null)}>
               {error}
-            </Alert>
-          </div>
-        )}
-
-        {success && (
-          <div className="px-[41px] mb-4">
-            <Alert severity="success">
-              Ligne mise à jour avec succès!
             </Alert>
           </div>
         )}
