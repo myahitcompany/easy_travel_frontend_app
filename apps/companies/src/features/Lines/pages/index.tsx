@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSetPageMeta } from "@/hooks";
 import { Edit, Trash, AddSquare } from "iconsax-react";
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -186,13 +185,6 @@ export function LinesPage() {
           </Tabs>
 
           <div className="flex space-x-4">
-            <Button
-              className="bg-primary-orange-100 rounded-[10px] h-10 normal-case"
-              startIcon={<FileDownloadIcon className="w-5 h-5" />}
-              variant="contained"
-            >
-              Exporter
-            </Button>
             <Button
               onClick={handleAddLine}
               className="bg-primary-orange-100 rounded-[10px] h-10 normal-case"

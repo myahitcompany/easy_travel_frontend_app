@@ -18,7 +18,7 @@ export const SidebarLink = ({
     <RouterNavLink
       to={to}
       className={({ isActive }) =>
-        ` rounded-[10px] flex flex-row items-center justify-start p-2 
+        ` rounded-[10px] flex flex-row items-center justify-start p-2
         ${
           isActive
             ? "bg-primary-orange-100 text-white"
@@ -26,7 +26,6 @@ export const SidebarLink = ({
         }
         hover:bg-primary-orange-100 hover:text-white group font-chakra font-medium leading-md`
       }
-      end
     >
       {React.cloneElement(icon, {
         ...iconProps,
